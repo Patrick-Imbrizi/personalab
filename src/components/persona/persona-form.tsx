@@ -493,8 +493,174 @@ function enhanceControlWithExample(control: React.ReactNode, example: string) {
   return { node: control, placeholderInjected: false };
 }
 
+function fillText(value: string, fallback: string) {
+  const normalized = value.trim();
+  return normalized.length ? normalized : fallback;
+}
+
+function fillList(value: string, fallback: string) {
+  const normalized = parseMultilineList(value);
+  return normalized.length ? value : fallback;
+}
+
+function applySimplifiedDefaults(values: PersonaFormValues): PersonaFormValues {
+  const personaName = fillText(values.name, "Marina Alves");
+  const product = fillText(values.context_productOrService, "Plataforma digital da disciplina");
+  const scenario = fillText(
+    values.context_scenario,
+    `${personaName} usa ${product} para concluir atividades acadêmicas com pouco tempo disponível.`,
+  );
+  const painPoint = fillList(
+    values.frustrations_painPoints,
+    "Fluxos longos demais\nFalta de clareza nas etapas",
+  );
+  const primaryGoal = fillList(
+    values.goals_primary,
+    "Concluir atividades da disciplina com qualidade",
+  );
+
+  return {
+    ...values,
+    locale: fillText(values.locale, "pt-BR"),
+    title: fillText(values.title, "Persona Exemplo"),
+    name: personaName,
+    archetype: fillText(values.archetype, "Usuária focada em produtividade"),
+    shortBio: fillText(
+      values.shortBio,
+      `${personaName} divide a rotina entre estudos e trabalho e precisa de uma interface simples para ganhar tempo.`,
+    ),
+    quote: fillText(
+      values.quote,
+      "Quero resolver meu exercício rápido, com confiança de que preenchi tudo certo.",
+    ),
+    demographics_ageRange: fillText(values.demographics_ageRange, "22-30 anos"),
+    demographics_genderIdentity: fillText(values.demographics_genderIdentity, "Não informado"),
+    demographics_location: fillText(values.demographics_location, "Brasil"),
+    demographics_educationLevel: fillText(values.demographics_educationLevel, "Ensino superior"),
+    demographics_occupation: fillText(values.demographics_occupation, "Estudante"),
+    demographics_incomeRange: fillText(values.demographics_incomeRange, "Não informado"),
+    demographics_householdComposition: fillText(
+      values.demographics_householdComposition,
+      "Mora com família",
+    ),
+    context_sector: fillText(values.context_sector, "Educação"),
+    context_productOrService: product,
+    context_scenario: scenario,
+    context_environment: fillText(
+      values.context_environment,
+      "Uso em notebook e celular, com sessões curtas durante a semana.",
+    ),
+    context_digitalProficiency: values.context_digitalProficiency || "Média",
+    goals_primary: primaryGoal,
+    goals_secondary: fillList(
+      values.goals_secondary,
+      "Organizar informações para apresentações\nCompartilhar resultados com colegas",
+    ),
+    frustrations_painPoints: painPoint,
+    frustrations_barriers: fillList(
+      values.frustrations_barriers,
+      "Pouco tempo disponível\nMudança frequente de contexto",
+    ),
+    frustrations_fears: fillList(
+      values.frustrations_fears,
+      "Entregar atividade incompleta\nPerder dados importantes",
+    ),
+    motivations_intrinsic: fillList(
+      values.motivations_intrinsic,
+      "Aprender UX de forma prática\nMelhorar qualidade das entregas",
+    ),
+    motivations_extrinsic: fillList(
+      values.motivations_extrinsic,
+      "Boa avaliação na disciplina\nConstruir portfólio",
+    ),
+    motivations_values: fillList(values.motivations_values, "Clareza\nPraticidade"),
+    behavior_habits: fillList(
+      values.behavior_habits,
+      "Revisa requisitos antes de preencher\nUsa checklist para validar campos",
+    ),
+    behavior_channels: fillList(values.behavior_channels, "WhatsApp\nGoogle Classroom"),
+    behavior_devices: fillList(values.behavior_devices, "Notebook\nSmartphone"),
+    behavior_contentFormats: fillList(
+      values.behavior_contentFormats,
+      "Guias rápidos\nExemplos preenchidos",
+    ),
+    behavior_techComfort: values.behavior_techComfort || "Médio",
+    behavior_decisionStyle: fillText(
+      values.behavior_decisionStyle,
+      "Compara opções por simplicidade de uso e impacto na produtividade.",
+    ),
+    behavior_purchaseTriggers: fillList(
+      values.behavior_purchaseTriggers,
+      "Demonstração prática\nResultado rápido",
+    ),
+    journey_awareness: fillText(
+      values.journey_awareness,
+      `Percebe o problema quando encontra ${parseMultilineList(painPoint)[0]?.toLowerCase() ?? "barreiras no fluxo"} ao executar atividades.`,
+    ),
+    journey_consideration: fillText(
+      values.journey_consideration,
+      "Compara ferramentas que ajudam a preencher com menos esforço e mais consistência.",
+    ),
+    journey_decision: fillText(
+      values.journey_decision,
+      "Escolhe a opção com instruções claras, boa navegação e exportação pronta para entrega.",
+    ),
+    journey_retention: fillText(
+      values.journey_retention,
+      "Continua usando quando percebe redução de retrabalho e ganho de velocidade nas atividades.",
+    ),
+    personality_communicationStyle: fillText(
+      values.personality_communicationStyle,
+      "Objetiva e orientada a resultados",
+    ),
+    personality_openness: values.personality_openness || 3,
+    personality_conscientiousness: values.personality_conscientiousness || 3,
+    personality_extroversion: values.personality_extroversion || 3,
+    personality_agreeableness: values.personality_agreeableness || 3,
+    personality_neuroticism: values.personality_neuroticism || 3,
+    personality_brandAffinity: fillText(
+      values.personality_brandAffinity,
+      "Prefere plataformas com interface limpa e linguagem simples.",
+    ),
+    accessibility_needs: fillList(
+      values.accessibility_needs,
+      "Contraste adequado\nHierarquia visual clara",
+    ),
+    accessibility_assistiveTech: fillList(values.accessibility_assistiveTech, "Nenhuma informada"),
+    accessibility_constraints: fillList(
+      values.accessibility_constraints,
+      "Tempo curto por sessão de uso",
+    ),
+    decisionCriteria: fillList(
+      values.decisionCriteria,
+      "Facilidade de uso\nQualidade da exportação",
+    ),
+    objections: fillList(
+      values.objections,
+      "Medo de preencher incompleto\nDúvida sobre formato final da entrega",
+    ),
+    successMetrics: fillList(
+      values.successMetrics,
+      "Tempo para concluir atividade\nRedução de retrabalho",
+    ),
+    opportunities: fillList(
+      values.opportunities,
+      "Orientação contextual por campo\nBiblioteca de personas exemplo",
+    ),
+    representativeStory: fillText(
+      values.representativeStory,
+      `${personaName} preenche a persona em sessões curtas e precisa de orientação clara para concluir tudo sem lacunas.`,
+    ),
+    notes: fillText(
+      values.notes,
+      "Gerado com modo simplificado; campos avançados podem ser refinados depois no modo detalhado.",
+    ),
+  };
+}
+
 export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
   const router = useRouter();
+  const [formVariant, setFormVariant] = useState<"detalhado" | "simplificado">("detalhado");
   const [pdfLayout, setPdfLayout] = useState<PdfLayout>("executivo");
   const [progress, setProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -512,80 +678,83 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
       setProgress(12);
       await delay(200);
 
+      const normalizedValues =
+        formVariant === "simplificado" ? applySimplifiedDefaults(values) : values;
+
       const payload = personaPayloadSchema.parse({
-        title: values.title,
-        locale: values.locale,
-        isPublic: values.isPublic,
+        title: normalizedValues.title,
+        locale: normalizedValues.locale,
+        isPublic: normalizedValues.isPublic,
         data: {
-          name: values.name,
-          archetype: values.archetype,
-          shortBio: values.shortBio,
-          quote: values.quote,
+          name: normalizedValues.name,
+          archetype: normalizedValues.archetype,
+          shortBio: normalizedValues.shortBio,
+          quote: normalizedValues.quote,
           demographics: {
-            ageRange: values.demographics_ageRange,
-            genderIdentity: values.demographics_genderIdentity,
-            location: values.demographics_location,
-            educationLevel: values.demographics_educationLevel,
-            occupation: values.demographics_occupation,
-            incomeRange: values.demographics_incomeRange,
-            householdComposition: values.demographics_householdComposition,
+            ageRange: normalizedValues.demographics_ageRange,
+            genderIdentity: normalizedValues.demographics_genderIdentity,
+            location: normalizedValues.demographics_location,
+            educationLevel: normalizedValues.demographics_educationLevel,
+            occupation: normalizedValues.demographics_occupation,
+            incomeRange: normalizedValues.demographics_incomeRange,
+            householdComposition: normalizedValues.demographics_householdComposition,
           },
           context: {
-            sector: values.context_sector,
-            productOrService: values.context_productOrService,
-            scenario: values.context_scenario,
-            environment: values.context_environment,
-            digitalProficiency: values.context_digitalProficiency,
+            sector: normalizedValues.context_sector,
+            productOrService: normalizedValues.context_productOrService,
+            scenario: normalizedValues.context_scenario,
+            environment: normalizedValues.context_environment,
+            digitalProficiency: normalizedValues.context_digitalProficiency,
           },
           goals: {
-            primary: parseMultilineList(values.goals_primary),
-            secondary: parseMultilineList(values.goals_secondary),
+            primary: parseMultilineList(normalizedValues.goals_primary),
+            secondary: parseMultilineList(normalizedValues.goals_secondary),
           },
           frustrations: {
-            painPoints: parseMultilineList(values.frustrations_painPoints),
-            barriers: parseMultilineList(values.frustrations_barriers),
-            fears: parseMultilineList(values.frustrations_fears),
+            painPoints: parseMultilineList(normalizedValues.frustrations_painPoints),
+            barriers: parseMultilineList(normalizedValues.frustrations_barriers),
+            fears: parseMultilineList(normalizedValues.frustrations_fears),
           },
           motivations: {
-            intrinsic: parseMultilineList(values.motivations_intrinsic),
-            extrinsic: parseMultilineList(values.motivations_extrinsic),
-            values: parseMultilineList(values.motivations_values),
+            intrinsic: parseMultilineList(normalizedValues.motivations_intrinsic),
+            extrinsic: parseMultilineList(normalizedValues.motivations_extrinsic),
+            values: parseMultilineList(normalizedValues.motivations_values),
           },
           behavior: {
-            habits: parseMultilineList(values.behavior_habits),
-            channels: parseMultilineList(values.behavior_channels),
-            devices: parseMultilineList(values.behavior_devices),
-            contentFormats: parseMultilineList(values.behavior_contentFormats),
-            techComfort: values.behavior_techComfort,
-            decisionStyle: values.behavior_decisionStyle,
-            purchaseTriggers: parseMultilineList(values.behavior_purchaseTriggers),
+            habits: parseMultilineList(normalizedValues.behavior_habits),
+            channels: parseMultilineList(normalizedValues.behavior_channels),
+            devices: parseMultilineList(normalizedValues.behavior_devices),
+            contentFormats: parseMultilineList(normalizedValues.behavior_contentFormats),
+            techComfort: normalizedValues.behavior_techComfort,
+            decisionStyle: normalizedValues.behavior_decisionStyle,
+            purchaseTriggers: parseMultilineList(normalizedValues.behavior_purchaseTriggers),
           },
           journey: {
-            awareness: values.journey_awareness,
-            consideration: values.journey_consideration,
-            decision: values.journey_decision,
-            retention: values.journey_retention,
+            awareness: normalizedValues.journey_awareness,
+            consideration: normalizedValues.journey_consideration,
+            decision: normalizedValues.journey_decision,
+            retention: normalizedValues.journey_retention,
           },
           personality: {
-            communicationStyle: values.personality_communicationStyle,
-            openness: parseNumber(values.personality_openness),
-            conscientiousness: parseNumber(values.personality_conscientiousness),
-            extroversion: parseNumber(values.personality_extroversion),
-            agreeableness: parseNumber(values.personality_agreeableness),
-            neuroticism: parseNumber(values.personality_neuroticism),
-            brandAffinity: values.personality_brandAffinity,
+            communicationStyle: normalizedValues.personality_communicationStyle,
+            openness: parseNumber(normalizedValues.personality_openness),
+            conscientiousness: parseNumber(normalizedValues.personality_conscientiousness),
+            extroversion: parseNumber(normalizedValues.personality_extroversion),
+            agreeableness: parseNumber(normalizedValues.personality_agreeableness),
+            neuroticism: parseNumber(normalizedValues.personality_neuroticism),
+            brandAffinity: normalizedValues.personality_brandAffinity,
           },
           accessibility: {
-            needs: parseMultilineList(values.accessibility_needs),
-            assistiveTech: parseMultilineList(values.accessibility_assistiveTech),
-            constraints: parseMultilineList(values.accessibility_constraints),
+            needs: parseMultilineList(normalizedValues.accessibility_needs),
+            assistiveTech: parseMultilineList(normalizedValues.accessibility_assistiveTech),
+            constraints: parseMultilineList(normalizedValues.accessibility_constraints),
           },
-          decisionCriteria: parseMultilineList(values.decisionCriteria),
-          objections: parseMultilineList(values.objections),
-          successMetrics: parseMultilineList(values.successMetrics),
-          opportunities: parseMultilineList(values.opportunities),
-          representativeStory: values.representativeStory,
-          notes: values.notes,
+          decisionCriteria: parseMultilineList(normalizedValues.decisionCriteria),
+          objections: parseMultilineList(normalizedValues.objections),
+          successMetrics: parseMultilineList(normalizedValues.successMetrics),
+          opportunities: parseMultilineList(normalizedValues.opportunities),
+          representativeStory: normalizedValues.representativeStory,
+          notes: normalizedValues.notes,
         },
       });
 
@@ -681,6 +850,41 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
             />
           </div>
 
+          <div className="space-y-3 rounded-md border p-4">
+            <p className="text-sm font-medium">Modo de preenchimento</p>
+            <RadioGroup
+              value={formVariant}
+              onValueChange={(value) =>
+                setFormVariant(value as "detalhado" | "simplificado")
+              }
+              className="grid gap-3 md:grid-cols-2"
+            >
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border p-3">
+                <RadioGroupItem value="detalhado" id="form-detalhado" />
+                <div>
+                  <p className="font-medium">Detalhado</p>
+                  <p className="text-xs text-muted-foreground">
+                    Exibe todos os campos da persona para preenchimento completo.
+                  </p>
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border p-3">
+                <RadioGroupItem value="simplificado" id="form-simplificado" />
+                <div>
+                  <p className="font-medium">Simplificado</p>
+                  <p className="text-xs text-muted-foreground">
+                    Mostra apenas campos essenciais e completa o restante automaticamente.
+                  </p>
+                </div>
+              </label>
+            </RadioGroup>
+            <p className="text-xs text-muted-foreground">
+              No modo simplificado, você pode salvar rápido e depois refinar no modo detalhado.
+            </p>
+          </div>
+
+          {formVariant === "detalhado" && (
+            <fieldset className="space-y-0">
           <Separator />
 
           <section className="space-y-4">
@@ -943,6 +1147,111 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
               <Textarea id="notes" rows={4} {...form.register("notes")} />
             </Field>
           </section>
+            </fieldset>
+          )}
+
+          {formVariant === "simplificado" && (
+            <section className="space-y-5">
+              <Separator />
+              <div className="space-y-2">
+                <h2 className="text-lg font-medium">Preenchimento simplificado</h2>
+                <p className="text-sm text-muted-foreground">
+                  Informe apenas o essencial. Os campos avançados serão auto-preenchidos para gerar
+                  uma persona válida.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Nome da persona" id="name">
+                  <Input id="name" required {...form.register("name")} />
+                </Field>
+                <Field label="Arquétipo" id="archetype">
+                  <Input id="archetype" required {...form.register("archetype")} />
+                </Field>
+              </div>
+
+              <Field label="Bio curta" id="short-bio">
+                <Textarea id="short-bio" required rows={4} {...form.register("shortBio")} />
+              </Field>
+
+              <Field label="Frase representativa" id="quote">
+                <Textarea id="quote" required rows={2} {...form.register("quote")} />
+              </Field>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Faixa etária" id="age-range">
+                  <Input id="age-range" {...form.register("demographics_ageRange")} />
+                </Field>
+                <Field label="Localização" id="location">
+                  <Input id="location" {...form.register("demographics_location")} />
+                </Field>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Setor" id="sector">
+                  <Input id="sector" required {...form.register("context_sector")} />
+                </Field>
+                <Field label="Produto/serviço" id="product-service">
+                  <Input id="product-service" required {...form.register("context_productOrService")} />
+                </Field>
+              </div>
+
+              <Field label="Cenário principal" id="scenario">
+                <Textarea id="scenario" required rows={3} {...form.register("context_scenario")} />
+              </Field>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ListField label="Objetivos primários" id="goals-primary" hint={listFieldHint()}>
+                  <Textarea id="goals-primary" required rows={4} {...form.register("goals_primary")} />
+                </ListField>
+                <ListField label="Pontos de dor" id="pain-points" hint={listFieldHint()}>
+                  <Textarea
+                    id="pain-points"
+                    required
+                    rows={4}
+                    {...form.register("frustrations_painPoints")}
+                  />
+                </ListField>
+                <ListField label="Motivações intrínsecas" id="intrinsic" hint={listFieldHint()}>
+                  <Textarea id="intrinsic" required rows={4} {...form.register("motivations_intrinsic")} />
+                </ListField>
+                <ListField label="Critérios de decisão" id="decision-criteria" hint={listFieldHint()}>
+                  <Textarea
+                    id="decision-criteria"
+                    required
+                    rows={4}
+                    {...form.register("decisionCriteria")}
+                  />
+                </ListField>
+                <ListField label="Métricas de sucesso" id="success-metrics" hint={listFieldHint()}>
+                  <Textarea
+                    id="success-metrics"
+                    required
+                    rows={4}
+                    {...form.register("successMetrics")}
+                  />
+                </ListField>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <ListField label="Canais preferidos" id="channels" hint={listFieldHint()}>
+                  <Textarea id="channels" rows={3} {...form.register("behavior_channels")} />
+                </ListField>
+                <ListField label="Dispositivos" id="devices" hint={listFieldHint()}>
+                  <Textarea id="devices" rows={3} {...form.register("behavior_devices")} />
+                </ListField>
+              </div>
+
+              <Field label="História representativa" id="representative-story">
+                <Textarea
+                  id="representative-story"
+                  required
+                  rows={4}
+                  {...form.register("representativeStory")}
+                />
+              </Field>
+            </section>
+          )}
         </CardContent>
       </Card>
 
