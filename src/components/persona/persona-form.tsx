@@ -2,7 +2,7 @@
 
 import { CircleHelp, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cloneElement, isValidElement, useState } from "react";
+import { cloneElement, isValidElement, useState, type ReactElement } from "react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -481,9 +481,10 @@ function enhanceControlWithExample(control: React.ReactNode, example: string) {
   }
 
   if (control.type === Input || control.type === Textarea) {
-    const currentPlaceholder = (control.props as { placeholder?: string }).placeholder;
+    const typedControl = control as ReactElement<{ placeholder?: string }>;
+    const currentPlaceholder = typedControl.props.placeholder;
     return {
-      node: cloneElement(control, {
+      node: cloneElement(typedControl, {
         placeholder: currentPlaceholder ?? example,
       }),
       placeholderInjected: true,
