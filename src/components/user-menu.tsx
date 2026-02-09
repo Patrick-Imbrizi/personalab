@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, UserCircle2 } from "lucide-react";
+import { KeyRound, LogOut, UserCircle2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -46,6 +47,12 @@ export function UserMenu({ email }: { email: string }) {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="truncate">{email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="gap-2">
+          <Link href="/conta/senha">
+            <KeyRound className="size-4" />
+            Alterar senha
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem disabled={loading} onClick={handleSignOut} className="gap-2">
           <LogOut className="size-4" />
           Sair

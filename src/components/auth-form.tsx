@@ -96,6 +96,14 @@ export function AuthForm() {
             />
           </div>
 
+          {mode === "signin" && (
+            <p className="text-right text-sm text-muted-foreground">
+              <Link href="/auth/recover" className="underline underline-offset-4">
+                Esqueci minha senha
+              </Link>
+            </p>
+          )}
+
           <Button className="w-full" disabled={loading} type="submit">
             {loading && <LoaderCircle className="size-4 animate-spin" />}
             {mode === "signin" ? messages.auth.signIn : messages.auth.signUp}
