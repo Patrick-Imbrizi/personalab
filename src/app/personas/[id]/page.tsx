@@ -5,6 +5,7 @@ import { PersonaOutputActions } from "@/components/persona/persona-output-action
 import { PersonaSummary } from "@/components/persona/persona-summary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { isAdminUser } from "@/lib/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPersonaRow } from "@/types/persona";
 
@@ -28,6 +29,7 @@ export default async function PersonaDetailPage({ params }: PersonaDetailPagePro
 
   const persona = mapPersonaRow(data);
   const isOwner = Boolean(user && persona.userId === user.id);
+  const isAdmin = Boolean(user && (await isAdminUser(supabase, user)));
 
   return (
     <div className="space-y-6">
@@ -39,13 +41,14 @@ export default async function PersonaDetailPage({ params }: PersonaDetailPagePro
           <Badge variant="outline">{persona.authorName ?? "Autor desconhecido"}</Badge>
           <Badge variant="outline">{new Date(persona.updatedAt).toLocaleDateString("pt-BR")}</Badge>
           {persona.sourcePersonaId && <Badge variant="secondary">Baseada em outra persona</Badge>}
+          {isAdmin && <Badge variant="secondary">Modo admin</Badge>}
         </div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{persona.title}</h1>
         <p className="text-sm text-muted-foreground">
           Visualize e exporte em PDF, JSON, Markdown ou impressão. {isOwner ? "" : "Para editar, use duplicação."}
         </p>
         <div className="flex flex-wrap gap-2 print:hidden">
-          <PersonaOutputActions persona={persona} isOwner={isOwner} />
+          <PersonaOutputActions persona={persona} isOwner={isOwner} isAdmin={isAdmin} />
           <Button asChild variant="ghost">
             <Link href="/personas">Voltar para listagem</Link>
           </Button>

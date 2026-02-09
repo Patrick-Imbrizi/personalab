@@ -820,6 +820,14 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-sm font-medium">Aviso de privacidade</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Não use dados reais de pessoas, dados sensíveis ou dados seus neste formulário.
+              Utilize apenas informações fictícias para estudo e exercícios da disciplina.
+            </p>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Título da Persona" id="title">
               <Input id="title" required {...form.register("title")} />

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isAdminUser } from "@/lib/admin";
 import { personaPayloadSchema } from "@/lib/persona-schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPersonaRow } from "@/types/persona";
@@ -112,7 +113,10 @@ export async function DELETE(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Persona não encontrada." }, { status: 404 });
     }
 
-    if (current.user_id !== authData.user.id) {
+    const isOwner = current.user_id === authData.user.id;
+    const isAdmin = await isAdminUser(supabase, authData.user);
+
+    if (!isOwner && !isAdmin) {
       return NextResponse.json({ error: "Sem permissão para excluir." }, { status: 403 });
     }
 

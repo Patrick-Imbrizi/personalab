@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 type PersonaOutputActionsProps = {
   persona: PersonaRecord;
   isOwner: boolean;
+  isAdmin: boolean;
 };
 
 function toSlug(value: string) {
@@ -34,9 +35,10 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function PersonaOutputActions({ persona, isOwner }: PersonaOutputActionsProps) {
+export function PersonaOutputActions({ persona, isOwner, isAdmin }: PersonaOutputActionsProps) {
   const router = useRouter();
   const [isBusy, setIsBusy] = useState(false);
+  const canDelete = isOwner || isAdmin;
 
   const slug = toSlug(persona.title) || "persona";
 
@@ -134,16 +136,26 @@ export function PersonaOutputActions({ persona, isOwner }: PersonaOutputActionsP
               Editar
             </Link>
           </Button>
-          <Button variant="destructive" disabled={isBusy} onClick={handleDelete}>
-            {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-            Excluir
-          </Button>
+          {canDelete && (
+            <Button variant="destructive" disabled={isBusy} onClick={handleDelete}>
+              {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Excluir
+            </Button>
+          )}
         </>
       ) : (
-        <Button disabled={isBusy} onClick={handleFork}>
-          {isBusy && <LoaderCircle className="size-4 animate-spin" />}
-          Duplicar para editar
-        </Button>
+        <>
+          <Button disabled={isBusy} onClick={handleFork}>
+            {isBusy && <LoaderCircle className="size-4 animate-spin" />}
+            Duplicar para editar
+          </Button>
+          {canDelete && (
+            <Button variant="destructive" disabled={isBusy} onClick={handleDelete}>
+              {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Excluir (admin)
+            </Button>
+          )}
+        </>
       )}
     </div>
   );
