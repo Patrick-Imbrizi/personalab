@@ -1,8 +1,8 @@
 "use client";
 
-import { LoaderCircle } from "lucide-react";
+import { CircleHelp, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { cloneElement, isValidElement, useState } from "react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PersonaFormMode = "create" | "edit";
 
@@ -238,6 +239,260 @@ function listFieldHint() {
   return "Um item por linha.";
 }
 
+type FieldGuide = {
+  tip: string;
+  example: string;
+};
+
+const FIELD_GUIDES: Record<string, FieldGuide> = {
+  title: {
+    tip: "Defina um título claro para identificar esta persona no projeto.",
+    example: "Persona UX - Cliente de Banco Digital",
+  },
+  locale: {
+    tip: "Informe o código de idioma da persona.",
+    example: "pt-BR",
+  },
+  "is-public": {
+    tip: "Ative para permitir que outros usuários visualizem e baixem a persona.",
+    example: "Ativado para compartilhar com a turma.",
+  },
+  name: {
+    tip: "Nome fictício que represente o perfil principal do público.",
+    example: "Mariana Costa",
+  },
+  archetype: {
+    tip: "Rótulo resumido do tipo de usuário.",
+    example: "Profissional multitarefa orientada a resultados",
+  },
+  "short-bio": {
+    tip: "Resumo rápido do contexto de vida e trabalho da persona.",
+    example:
+      "Mariana, 32 anos, gerente de operações, precisa tomar decisões rápidas com base em poucos dados.",
+  },
+  quote: {
+    tip: "Frase que represente a visão ou necessidade central da persona.",
+    example: "Se eu perder tempo no fluxo, o cliente final sente na hora.",
+  },
+  "age-range": {
+    tip: "Faixa etária aproximada do perfil.",
+    example: "28-35 anos",
+  },
+  "gender-identity": {
+    tip: "Identidade de gênero informada para contextualização demográfica.",
+    example: "Mulher",
+  },
+  location: {
+    tip: "Cidade/região onde a persona vive ou trabalha.",
+    example: "São Paulo - SP",
+  },
+  "education-level": {
+    tip: "Nível de escolaridade predominante da persona.",
+    example: "Ensino superior completo",
+  },
+  occupation: {
+    tip: "Profissão/cargo principal da persona.",
+    example: "Analista de Produto",
+  },
+  "income-range": {
+    tip: "Faixa de renda estimada para apoiar decisões de negócio e produto.",
+    example: "R$ 8.000 a R$ 12.000",
+  },
+  "household-composition": {
+    tip: "Com quem a persona mora e dinâmica familiar relevante.",
+    example: "Casada, 1 filho em idade escolar",
+  },
+  sector: {
+    tip: "Segmento de mercado em que o exercício está inserido.",
+    example: "Educação",
+  },
+  "product-service": {
+    tip: "Produto ou serviço avaliado no projeto.",
+    example: "Plataforma de cursos online",
+  },
+  scenario: {
+    tip: "Situação principal em que a persona usa o produto.",
+    example:
+      "Acessa o sistema entre reuniões para revisar progresso dos alunos e ajustar tarefas rapidamente.",
+  },
+  environment: {
+    tip: "Condições do contexto de uso (tempo, local, ruído, dispositivos, conectividade).",
+    example: "Ambiente híbrido, com uso no notebook no escritório e celular em deslocamento.",
+  },
+  "digital-proficiency": {
+    tip: "Nível de familiaridade da persona com tecnologia digital.",
+    example: "Média",
+  },
+  "goals-primary": {
+    tip: "Resultados principais que a persona precisa alcançar.",
+    example: "Reduzir retrabalho\nTomar decisões mais rápidas",
+  },
+  "goals-secondary": {
+    tip: "Objetivos complementares, menos críticos.",
+    example: "Compartilhar relatórios com facilidade\nAcompanhar evolução semanal",
+  },
+  "pain-points": {
+    tip: "Problemas recorrentes que geram frustração.",
+    example: "Fluxo confuso\nMuitas etapas para concluir uma tarefa",
+  },
+  barriers: {
+    tip: "Limitações externas que atrapalham o uso do produto.",
+    example: "Internet instável\nPouco tempo disponível",
+  },
+  fears: {
+    tip: "Riscos e receios percebidos pela persona.",
+    example: "Tomar decisão errada\nPerder dados importantes",
+  },
+  intrinsic: {
+    tip: "Motivações internas (valores pessoais e propósito).",
+    example: "Sentir controle da rotina\nEntregar trabalho com qualidade",
+  },
+  extrinsic: {
+    tip: "Motivações externas (reconhecimento, ganhos, metas).",
+    example: "Ser reconhecida pela liderança\nCumprir metas trimestrais",
+  },
+  values: {
+    tip: "Princípios importantes para a persona ao decidir e agir.",
+    example: "Confiabilidade\nPraticidade",
+  },
+  habits: {
+    tip: "Rotinas e comportamentos do dia a dia ligados ao produto.",
+    example: "Checa indicadores no início do dia\nSalva atalhos para tarefas repetidas",
+  },
+  channels: {
+    tip: "Canais usados para comunicação e resolução de problemas.",
+    example: "WhatsApp\nE-mail\nYouTube",
+  },
+  devices: {
+    tip: "Dispositivos utilizados com maior frequência.",
+    example: "Notebook\nSmartphone",
+  },
+  "content-formats": {
+    tip: "Formatos de conteúdo que a persona consome melhor.",
+    example: "Tutoriais curtos\nChecklist visual",
+  },
+  "tech-comfort": {
+    tip: "Nível de segurança para aprender e usar novas ferramentas.",
+    example: "Médio",
+  },
+  "decision-style": {
+    tip: "Como a persona compara opções e toma decisões.",
+    example: "Compara prós e contras e valida com evidências de uso real.",
+  },
+  "purchase-triggers": {
+    tip: "Eventos que aceleram adoção/compra de uma solução.",
+    example: "Prova gratuita com resultado rápido\nIndicação de colega confiável",
+  },
+  "journey-awareness": {
+    tip: "Como percebe o problema e descobre alternativas.",
+    example: "Percebe gargalos no trabalho e busca soluções em comunidades e vídeos.",
+  },
+  "journey-consideration": {
+    tip: "Como compara opções antes de escolher.",
+    example: "Analisa preço, tempo de implantação e facilidade de aprendizado.",
+  },
+  "journey-decision": {
+    tip: "Fatores finais que levam à decisão.",
+    example: "Escolhe a opção com menor risco e melhor suporte inicial.",
+  },
+  "journey-retention": {
+    tip: "Condições para continuar usando a solução no tempo.",
+    example: "Permanece quando percebe ganho real de produtividade semana após semana.",
+  },
+  "communication-style": {
+    tip: "Tom e forma de comunicação preferidos pela persona.",
+    example: "Direta, objetiva e orientada a ação",
+  },
+  "brand-affinity": {
+    tip: "Características de marca que geram confiança.",
+    example: "Marcas transparentes, com suporte rápido e linguagem simples",
+  },
+  openness: {
+    tip: "Abertura a novas experiências e ideias.",
+    example: "4",
+  },
+  conscientiousness: {
+    tip: "Nível de organização e disciplina.",
+    example: "5",
+  },
+  extroversion: {
+    tip: "Nível de sociabilidade e energia em interações.",
+    example: "3",
+  },
+  agreeableness: {
+    tip: "Tendência a cooperação e empatia.",
+    example: "4",
+  },
+  neuroticism: {
+    tip: "Sensibilidade a estresse e instabilidade emocional.",
+    example: "2",
+  },
+  "accessibility-needs": {
+    tip: "Necessidades de acessibilidade para boa experiência.",
+    example: "Alto contraste\nTextos objetivos",
+  },
+  "assistive-tech": {
+    tip: "Tecnologias assistivas utilizadas pela persona.",
+    example: "Leitor de tela\nAmpliação de fonte",
+  },
+  constraints: {
+    tip: "Restrições que impactam navegação e entendimento.",
+    example: "Pouco tempo para leitura longa\nAmbiente com distrações",
+  },
+  "decision-criteria": {
+    tip: "Critérios mais importantes para escolher uma solução.",
+    example: "Facilidade de uso\nCusto-benefício\nConfiabilidade",
+  },
+  objections: {
+    tip: "Dúvidas ou objeções que impedem avanço.",
+    example: "Implementação demorada\nTreinamento complexo",
+  },
+  "success-metrics": {
+    tip: "Indicadores para medir se a experiência melhorou.",
+    example: "Tempo médio por tarefa\nTaxa de conclusão\nSatisfação (NPS/CSAT)",
+  },
+  opportunities: {
+    tip: "Ideias e oportunidades de melhoria em UX.",
+    example: "Simplificar onboarding\nCriar dashboard com insights prioritários",
+  },
+  "representative-story": {
+    tip: "Narrativa concreta de uma situação real de uso.",
+    example:
+      "Na semana de fechamento mensal, Mariana precisou gerar relatório rápido no celular e não encontrou a ação principal no fluxo atual.",
+  },
+  notes: {
+    tip: "Registre observações extras úteis para o exercício.",
+    example: "Validar hipóteses com 3 entrevistas adicionais no próximo sprint.",
+  },
+};
+
+function getFieldGuide(id: string, label: string): FieldGuide {
+  return (
+    FIELD_GUIDES[id] ?? {
+      tip: `Explique aqui informações relevantes sobre ${label.toLowerCase()}.`,
+      example: `Ex.: ${label}`,
+    }
+  );
+}
+
+function enhanceControlWithExample(control: React.ReactNode, example: string) {
+  if (!isValidElement(control)) {
+    return { node: control, placeholderInjected: false };
+  }
+
+  if (control.type === Input || control.type === Textarea) {
+    const currentPlaceholder = (control.props as { placeholder?: string }).placeholder;
+    return {
+      node: cloneElement(control, {
+        placeholder: currentPlaceholder ?? example,
+      }),
+      placeholderInjected: true,
+    };
+  }
+
+  return { node: control, placeholderInjected: false };
+}
+
 export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
   const router = useRouter();
   const [pdfLayout, setPdfLayout] = useState<PdfLayout>("executivo");
@@ -386,7 +641,8 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+    <TooltipProvider delayDuration={120}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>{mode === "create" ? messages.persona.createTitle : messages.persona.editTitle}</CardTitle>
@@ -396,24 +652,26 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título da Persona</Label>
+            <Field label="Título da Persona" id="title">
               <Input id="title" required {...form.register("title")} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="locale">Idioma</Label>
-              <Input id="locale" placeholder="pt-BR" {...form.register("locale")} />
-              <p className="text-xs text-muted-foreground">
-                Estrutura preparada para suportar novos idiomas no futuro.
-              </p>
-            </div>
+            </Field>
+            <Field label="Idioma" id="locale">
+              <Input id="locale" {...form.register("locale")} />
+            </Field>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 rounded-md border p-4">
             <div className="space-y-1">
-              <Label htmlFor="is-public">Visibilidade pública</Label>
+              <LabelWithHelp
+                id="is-public"
+                label="Visibilidade pública"
+                tip={getFieldGuide("is-public", "Visibilidade pública").tip}
+              />
               <p className="text-sm text-muted-foreground">
                 Permitirá que outras pessoas visualizem e baixem esta persona.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Exemplo: {getFieldGuide("is-public", "Visibilidade pública").example}
               </p>
             </div>
             <Switch
@@ -743,7 +1001,8 @@ export function PersonaForm({ mode, initialPersona }: PersonaFormProps) {
           </div>
         </CardContent>
       </Card>
-    </form>
+      </form>
+    </TooltipProvider>
   );
 }
 
@@ -756,10 +1015,16 @@ function Field({
   id: string;
   children: React.ReactNode;
 }) {
+  const guide = getFieldGuide(id, label);
+  const { node, placeholderInjected } = enhanceControlWithExample(children, guide.example);
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
+      <LabelWithHelp id={id} label={label} tip={guide.tip} />
+      {node}
+      {!placeholderInjected && (
+        <p className="text-xs text-muted-foreground">Exemplo: {guide.example}</p>
+      )}
     </div>
   );
 }
@@ -775,10 +1040,16 @@ function ListField({
   hint: string;
   children: React.ReactNode;
 }) {
+  const guide = getFieldGuide(id, label);
+  const { node, placeholderInjected } = enhanceControlWithExample(children, guide.example);
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
+      <LabelWithHelp id={id} label={label} tip={guide.tip} />
+      {node}
+      {!placeholderInjected && (
+        <p className="text-xs text-muted-foreground">Exemplo: {guide.example}</p>
+      )}
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
   );
@@ -793,10 +1064,42 @@ function ScoreField({
   id: string;
   register: UseFormRegisterReturn;
 }) {
+  const guide = getFieldGuide(id, label);
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label} (1-5)</Label>
-      <Input id={id} type="number" min={1} max={5} required {...register} />
+      <LabelWithHelp id={id} label={`${label} (1-5)`} tip={guide.tip} />
+      <Input id={id} type="number" min={1} max={5} required placeholder={guide.example} {...register} />
+    </div>
+  );
+}
+
+function LabelWithHelp({
+  id,
+  label,
+  tip,
+}: {
+  id: string;
+  label: string;
+  tip: string;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`Ajuda sobre ${label}`}
+          >
+            <CircleHelp className="size-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-72 text-left leading-relaxed">
+          {tip}
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }
